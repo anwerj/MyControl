@@ -60,7 +60,7 @@ mcprevd() same as \mc::pre();#VD
 <br>
 mcjs() same as \mc::js();
 <br>
-mcjswv() same as \mc::js();WV
+mcjswv() same as \mc::js();#WV
 <br>
 
 Hope you get used to it.
