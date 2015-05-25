@@ -116,6 +116,15 @@ class mc {
         else
             return round((memory_get_usage()/(1024*1024)), 3);            
     }
+    
+    /**
+     * Dump a variable using serielize or json_encode to log file
+     * <b>Check $log_path first</b>
+     * 
+     * @param #SE  Uses serielize in place of json_encode
+     * @param type $var Variable to Dump
+     * @param type $title Title to file
+     */
 
     public static function dump($var,$title='') {
         $calling_line = self::calling_line();
