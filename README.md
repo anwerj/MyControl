@@ -1,6 +1,7 @@
 # mycontrol
 
-MyControl is a simple initiative for PHP Developer who are just tired of using <b> print_r </b> and <b>var_dump</b>
+MyControl is a simple initiative for PHP Developer who are just tired of using <b> print_r </b> and <b>var_dump</b>.
+<br>
 It is mainly and only used in Debugging the app.
 
 You can add this file in you <b style='color:#345'>php.ini</b> file in <b>auto_prepend_file</b> section.
@@ -11,7 +12,7 @@ To avoid the conflict you can add mycontrol/auto_prepend.php file in one of incl
 # API
 
 <b>/mc:pre()</b><br/>
-with various capabilities the function can provide more than print_f and var_dump
+With various capabilities the function can provide more than print_f and var_dump
 PHPDoc is provided with the function.
 example:
 <br>
@@ -28,21 +29,24 @@ Print json encoded string for variable .
 <br>
 
 <b>/mc::dump($var,$title='')</b> <br>
-In case you dont want the variable to print just dump in in a file , edit $log_path variable and you are good to go
+In case you dont want the variable to print just dump in a file , edit $log_path variable and you are good to go
 <br>
 
 # What else
-Well that was just the beginnig <b>mycontrol</b> provides features which are just what a coder need.
-You do not pass options to function but provide them in comment like <br>
+Well that was just the beginnig ,<b>mycontrol</b> provides features which are just what a coder need.
+You do not need to pass options to function but provide them in comment like <br>
+<br>
 <code>
   \mc::pre($var1,$var2,$class,'One more string',['array']);#ND
 </code>
-<br>
+<br><br>
 will not kill the script in the end , or
+<br>
 <br>
 <code>
   \mc::pre($var1,$var2,$class,'One more string',['array']);#ND#VD
 </code>
+<br>
 <br>
 will use var_dump in place of print_r , also there is no killing this time.
 <br>
@@ -52,15 +56,21 @@ There are many more features , you can find simply by PHPDocs provided.
 There are some helper functions provided for those who just hate calling a class.
 like
 <br>
+<br>
 mcpre() same as \mc::pre() ,
+<br>
 <br>
 mcprend() same as \mc::pre();#ND
 <br>
+<br>
 mcprevd() same as \mc::pre();#VD
+<br>
 <br>
 mcjs() same as \mc::js();
 <br>
+<br>
 mcjswv() same as \mc::js();#WV
+<br>
 <br>
 
 Hope you get used to it.
