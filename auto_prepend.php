@@ -3,6 +3,8 @@
 class mc {
     
     protected static $log_path = '/var/www/html/core/log/';
+    protected static $var_path = '/var/www/html/core/var/';
+    protected static $alert_uri = 'http://localhost:3333';
     public static $trace_back = 1;
 
     /**
@@ -38,15 +40,22 @@ class mc {
         
         if ($np)
             echo "<pre>";
-        
-        foreach ($variables as $key => $value) {
-            if (isset($var_array[$key])) {
-                echo "<h3 style='background-color:#eee;padding: 5px;'>#$key : " . substr($var_array[$key], 0, 40) . "</h3>";
+        if(is_array($variables)){
+            foreach ($variables as $key => $value) {
+                if (isset($var_array[$key])) {
+                    echo "<h3 style='background-color:#eee;padding: 5px;'>#$key : " . substr($var_array[$key], 0, 40) . "</h3>";
+                }
+                if ($vd)
+                    var_dump($value);
+                else
+                    print_r($value);
             }
-            if ($vd)
-                var_dump($value);
-            else
-                print_r($value);
+        }
+        else{
+                if ($vd)
+                    var_dump($variables);
+                else
+                    print_r($variables);            
         }
         if ($np)
             echo "</pre>";
@@ -100,7 +109,47 @@ class mc {
         echo json_encode($to_encode);
         die();
     }
+    
+    public static function cache($var,$data){
+        
+    }
 
+    public static function read($var){
+        $filename = self::$var_path.$var.".var";
+        $return = '{}';
+        if(file_exists($filename)){
+            $return =  file_get_contents($filename);
+        }
+        return $return;
+    }
+    public static function write($var,$data,$mode='w+'){        
+        $filename = self::$var_path.$var.".var";
+        $f = fopen($filename, $mode);
+        if(!is_string($data)){
+            $data = json_encode($data);
+        }
+        return fputs($f, $data, strlen($data));
+        
+    }
+    
+    public static function append($var,$data){
+        self::write($var, ' ','a+');
+        return self::write($var, $data, 'a+');
+        
+    }
+
+    
+
+    public static function alert($text = 'OK!'){
+        
+        $calling = self::calling_line(self::$trace_back);
+        $calling_line = $calling['line_number'];
+        $calling_file = $calling['file'];
+        $msg = $text."\n\n".$calling_file." : ".$calling_line;
+        $msg = urlencode($msg);
+        
+        $sFile = file_get_contents("http://127.0.0.1:3333"."?text=".$msg);
+    }
 
     private static function first_byte(){
         echo "<h3 style='background-color:#333;color:#ddd;padding:10px'>"
@@ -129,9 +178,9 @@ class mc {
     public static function dump($var,$title='') {
         $calling_line = self::calling_line();
         $file_start = empty($title)?time():$title;
-        $filename = $file_start."-".self::clean($calling_line);
+        $filename = $file_start."-".self::clean($calling_line['line']);
         $file = fopen(self::$log_path.$filename, 'w+');
-        if(self::string_has($calling_line, '#SE'))
+        if(self::string_has($calling_line['line'], '#SE'))
             $toPut = serialize($var);
         else
             $toPut = json_encode ($var);
@@ -185,6 +234,25 @@ class mc {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== FALSE);
     }
+    
+    public static function dot($array, $prepend = '',$dot='.')
+	{
+		$results = [];
+
+		foreach ($array as $key => $value)
+		{
+			if (is_array($value))
+			{
+				$results = array_merge($results, static::dot($value, $prepend.$key.$dot,$dot));
+			}
+			else
+			{
+				$results[$prepend.$key] = $value;
+			}
+		}
+
+		return $results;
+	}
 
     private static function parameter_array($boundry, $string) {
         $str = '';
@@ -258,5 +326,14 @@ function mcjswv(){
     $variables = func_get_args();    
     \mc::$trace_back = 2;
     \mc::js($variables);#WV
+    
+}
+
+/**
+ * Alert text with Ubutnu's notify-send
+ */
+function mcalert($text = 'OK'){   
+    \mc::$trace_back = 2;
+    \mc::alert($text);#WV
     
 }
