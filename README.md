@@ -32,6 +32,20 @@ Print json encoded string for variable .
 In case you dont want the variable to print just dump in a file , edit $log_path variable and you are good to go
 <br>
 
+
+<b>/mc::append($var,$data)</b> <br>
+Now suppose you are in for loop and want to see data at each iteration , edit $var_path and pass $var to be the filename and data to be the variable to dump.
+<br>
+
+<b>/mc::write($var,$data)</b> <br>
+Same as mc::dump but is used to cache a variable, in case your calling APIs and stuff.Here $var is file name and data , well obviously data.
+</br>
+
+<b>/mc::read($var)</b>
+Read mc::write(d) data in to array.
+<br>
+
+
 # What else
 Well that was just the beginnig ,<b>mycontrol</b> provides features which are just what a coder need.
 You do not need to pass options to function but provide them in comment like <br>
