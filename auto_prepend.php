@@ -2,15 +2,16 @@
 
 class mc {
     
-    protected static $log_path = '/var/www/html/core/log/';
-    protected static $var_path = '/var/www/html/core/var/';
-    protected static $alert_uri = 'http://localhost:3333';
+    public static $log_path = '/var/www/html/core/log/';
+    public static $var_path = '/var/www/html/core/var/';
+    public static $config_path = '/var/www/html/core/config/';
+    public static $alert_uri = 'http://localhost:3333';
     public static $trace_back = 1;
 
     /**
      * Prints the variable based on hashtag found
      *
-     * <b>\mc::pre($var1,[$var2...]);#VD#NP</b>
+     * <b>mc::pre($var1,[$var2...]);#VD#NP</b>
      * 
      * @param #NP Disable pre tag
      * @param #VD Use var_dump in place of print_r
@@ -28,6 +29,7 @@ class mc {
         $np = !self::string_has($calling_line, '#NP');
         $vd = self::string_has($calling_line, '#VD');
         
+        //header('Content-Type: text/htnl');
         
         echo self::first_byte();
         
@@ -70,7 +72,7 @@ class mc {
     /**
      * Echo json_encoded variable based on hashtag found
      *
-     * <b>\mc::pre($var1,[$var2...]);#WV</b>
+     * <b>mc::pre($var1,[$var2...]);#WV</b>
      * 
      * @param #WV Returns with arguement's name
      */
@@ -114,21 +116,25 @@ class mc {
         
     }
 
-    public static function read($var){
-        $filename = self::$var_path.$var.".var";
+    public static function read($var,$toArray = 0){
+        $filename = self::$var_path.$var.".json";
         $return = '{}';
         if(file_exists($filename)){
             $return =  file_get_contents($filename);
         }
+        if($toArray){
+            return json_decode($return, true);
+        }
         return $return;
     }
     public static function write($var,$data,$mode='w+'){        
-        $filename = self::$var_path.$var.".var";
+        $filename = self::$var_path.$var.".json";
         $f = fopen($filename, $mode);
         if(!is_string($data)){
             $data = json_encode($data);
         }
-        return fputs($f, $data, strlen($data));
+        if(!empty($data) && strlen($data)>10)
+            return fputs($f, $data, strlen($data));
         
     }
     
@@ -188,11 +194,15 @@ class mc {
         fclose($file);
     }
 
-    private static function calling_line($trace_back = 1) {
+    public static function calling_line($trace_back = 1,$die=0) {
         $trace = debug_backtrace();
         $back = $trace[$trace_back];
         $line = self::file_line($back['file'], $back['line']);
-        return ['line'=>$line,'file'=>$back['file'],'line_number'=>$back['line']];
+        $return = ['line'=>$line,'file'=>$back['file'],'line_number'=>$back['line']];
+        if(empty($die))
+          return $return;
+        else
+          self::pre ($return);
     }
 
     private static function file_line($file, $line) {
@@ -290,32 +300,32 @@ class mc {
 
 function mcpre(){
     $variables = func_get_args();
-    \mc::$trace_back = 2;
-    \mc::pre($variables);
+    mc::$trace_back = 2;
+    mc::pre($variables);
 }
 /**
  * Print the variables without killing script
  */
 function mcprend(){
     $variables = func_get_args();
-    \mc::$trace_back = 2;
-    \mc::pre($variables);#ND
+    mc::$trace_back = 2;
+    mc::pre($variables);#ND
 }
 /**
  * Var_Dump the varaibles and kill the script
  */
 function mcprevd(){
     $variables = func_get_args();
-    \mc::$trace_back = 2;
-    \mc::pre($variables);#VD
+    mc::$trace_back = 2;
+    mc::pre($variables);#VD
 }
 /**
  * Echo JSON encoded string for variables and kill the script
  */
 function mcjs(){
     $variables = func_get_args();    
-    \mc::$trace_back = 2;
-    \mc::js($variables);
+    mc::$trace_back = 2;
+    mc::js($variables);
     
 }
 
@@ -324,8 +334,8 @@ function mcjs(){
  */
 function mcjswv(){
     $variables = func_get_args();    
-    \mc::$trace_back = 2;
-    \mc::js($variables);#WV
+    mc::$trace_back = 2;
+    mc::js($variables);#WV
     
 }
 
@@ -333,7 +343,71 @@ function mcjswv(){
  * Alert text with Ubutnu's notify-send
  */
 function mcalert($text = 'OK'){   
-    \mc::$trace_back = 2;
-    \mc::alert($text);#WV
+    mc::$trace_back = 2;
+    mc::alert($text);#WV
     
 }
+
+/*
+ *  Override PHP functions
+ */
+
+ @runkit_function_remove('go_curl');
+ runkit_function_rename('curl_exec','go_curl');
+ runkit_function_add('curl_exec','$ch','return handle_curl($ch);');
+
+
+function handle_curl($ch){
+  
+    $info = curl_getinfo($ch);
+    $url = mc::clean($info['url']);
+    $filename = mc::$var_path.'curl/'.$url.'.curl';
+    
+    if(mc::string_has($filename, 'localhost')){
+      $response = go_curl($ch);
+    }elseif(!file_exists($filename) || CURL_FORCE ){
+      
+      $file = fopen($filename, 'w+');
+      $response = go_curl($ch);
+      if($response){
+        // CASE GOT RESPONSE
+        fputs($file, $response, strlen($response));        
+      }else{
+        // CASE NO RESPONSE
+        
+      }
+      
+    }else{
+      
+      $response = file_get_contents($filename);
+      
+    }
+    
+    return $response;
+ }
+ 
+ function initConfig(){
+   $file = fopen(mc::$config_path.'config.cnf','a+');
+   while(1){
+     $line = fgets($file);
+     $array = explode('=', $line);
+     if(!isset($array[1])){
+       break;
+     }
+     
+     runkit_constant_add(strtoupper($array[0]),$array[1]);
+   }
+   
+ }
+ 
+ function initNetwork(){
+  // If Internet Not Wo
+//   if(!INTERNET_WORKING){
+//     $content = @file_get_contents('https://www.googleapis.com/plus/v1/people');
+//     if($content){
+//       runkit_constant_add('INTERNET_WORKING',1);
+//       fopen(mc::$config_path.'force.curl', 'w+');
+//     }
+//   }   
+ }
+ initConfig();
