@@ -350,6 +350,8 @@ function mcalert($text = 'OK'){
 
 /*
  *  Override PHP functions
+ *  Comment these lines if you dont have runkit install
+ *  These will save all outgoing curl requests.
  */
 
  @runkit_function_remove('go_curl');
