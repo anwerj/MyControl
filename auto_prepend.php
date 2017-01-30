@@ -1,7 +1,7 @@
 <?php
 
 class mc {
-    
+
     public static $log_path = '/var/www/html/core/log/';
     public static $var_path = '/var/www/html/core/var/';
     public static $config_path = '/var/www/html/core/config/';
@@ -12,7 +12,7 @@ class mc {
      * Prints the variable based on hashtag found
      *
      * <b>mc::pre($var1,[$var2...]);#VD#NP</b>
-     * 
+     *
      * @param #NP Disable pre tag
      * @param #VD Use var_dump in place of print_r
      * @param #ND Skip die in the end
@@ -22,24 +22,24 @@ class mc {
         $calling = self::calling_line(self::$trace_back);
         $calling_line = $calling['line'];
         $var_array = self::parameter_array('pre', $calling_line);
-        
-        
+
+
         $calling = self::calling_line(1);
         $calling_line = $calling['line'];
         $np = !self::string_has($calling_line, '#NP');
         $vd = self::string_has($calling_line, '#VD');
-        
+
         //header('Content-Type: text/htnl');
-        
+
         echo self::first_byte();
-        
+
         if(self::$trace_back==1){
             $variables = func_get_args();
         }else{
             $varaibles_array = func_get_args();
             $variables = $varaibles_array[0];
         }
-        
+
         if ($np)
             echo "<pre>";
         if(is_array($variables)){
@@ -57,7 +57,7 @@ class mc {
                 if ($vd)
                     var_dump($variables);
                 else
-                    print_r($variables);            
+                    print_r($variables);
         }
         if ($np)
             echo "</pre>";
@@ -73,32 +73,32 @@ class mc {
      * Echo json_encoded variable based on hashtag found
      *
      * <b>mc::pre($var1,[$var2...]);#WV</b>
-     * 
+     *
      * @param #WV Returns with arguement's name
      */
     public static function js(){
         $calling = self::calling_line(self::$trace_back);
         $calling_line = $calling['line'];
         $var_array = self::parameter_array('pre', $calling_line);
-        
-        
+
+
         $calling = self::calling_line(1);
         $calling_line = $calling['line'];
         $wv = self::string_has($calling_line, '#WV');
-        
-        
+
+
         if(self::$trace_back==1){
             $variables = func_get_args();
         }else{
             $varaibles_array = func_get_args();
             $variables = $varaibles_array[0];
-        }       
-        
+        }
+
         if(!$wv){
             echo json_encode($variables);
             die();
         }
-        
+
         $to_encode = [];
         foreach ($variables as $key => $value) {
             if (isset($var_array[$key])) {
@@ -111,9 +111,9 @@ class mc {
         echo json_encode($to_encode);
         die();
     }
-    
+
     public static function cache($var,$data){
-        
+
     }
 
     public static function read($var,$toArray = 0){
@@ -127,7 +127,7 @@ class mc {
         }
         return $return;
     }
-    public static function write($var,$data,$mode='w+'){        
+    public static function write($var,$data,$mode='w+'){
         $filename = self::$var_path.$var.".json";
         $f = fopen($filename, $mode);
         if(!is_string($data)){
@@ -135,25 +135,25 @@ class mc {
         }
         if(!empty($data) && strlen($data)>10)
             return fputs($f, $data, strlen($data));
-        
+
     }
-    
+
     public static function append($var,$data){
         self::write($var, ' ','a+');
         return self::write($var, $data, 'a+');
-        
+
     }
 
-    
+
 
     public static function alert($text = 'OK!'){
-        
+
         $calling = self::calling_line(self::$trace_back);
         $calling_line = $calling['line_number'];
         $calling_file = $calling['file'];
         $msg = $text."\n\n".$calling_file." : ".$calling_line;
         $msg = urlencode($msg);
-        
+
         $sFile = file_get_contents("http://127.0.0.1:3333"."?text=".$msg);
     }
 
@@ -164,18 +164,18 @@ class mc {
         . "Current Usage: ".self::parse_memory(0)." MB"
         . "</h3>";
     }
-    
-    private static function parse_memory($peak = 1){
+
+    public static function parse_memory($peak = 1){
         if($peak)
             return round((memory_get_peak_usage()/(1024*1024)), 3);
         else
-            return round((memory_get_usage()/(1024*1024)), 3);            
+            return round((memory_get_usage()/(1024*1024)), 3);
     }
-    
+
     /**
      * Dump a variable using serielize or json_encode to log file
      * <b>Check $log_path first</b>
-     * 
+     *
      * @param #SE  Uses serielize in place of json_encode
      * @param type $var Variable to Dump
      * @param type $title Title to file
@@ -223,7 +223,7 @@ class mc {
         $text = strtolower($text);
         // Strip out anything we haven't been able to convert
         $text = preg_replace('/[^-\w]+/', '', $text);
-        
+
         $text = substr($text, 0, $l);
         return $text;
     }
@@ -244,7 +244,7 @@ class mc {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== FALSE);
     }
-    
+
     public static function dot($array, $prepend = '',$dot='.')
 	{
 		$results = [];
@@ -286,7 +286,7 @@ class mc {
                 $value=  substr ($value, 1, strlen ($value));
             if(self::end_with($value, ','))
                 $value = substr ($value, 0,  strlen ($value)-1);
-            
+
             $output[$key]=$value;
         }
         return $output;
@@ -323,36 +323,36 @@ function mcprevd(){
  * Echo JSON encoded string for variables and kill the script
  */
 function mcjs(){
-    $variables = func_get_args();    
+    $variables = func_get_args();
     mc::$trace_back = 2;
     mc::js($variables);
-    
+
 }
 
 /**
  * Echo JSON encoded string for variables with variable names and kill the script
  */
 function mcjswv(){
-    $variables = func_get_args();    
+    $variables = func_get_args();
     mc::$trace_back = 2;
     mc::js($variables);#WV
-    
+
 }
 
 /**
  * Alert text with Ubutnu's notify-send
  */
-function mcalert($text = 'OK'){   
+function mcalert($text = 'OK'){
     mc::$trace_back = 2;
     mc::alert($text);#WV
-    
+
 }
 
 /*
  *  Override PHP functions
  *  Comment these lines if you dont have runkit install
  *  These will save all outgoing curl requests.
- */
+
 
  @runkit_function_remove('go_curl');
  runkit_function_rename('curl_exec','go_curl');
@@ -360,34 +360,34 @@ function mcalert($text = 'OK'){
 
 
 function handle_curl($ch){
-  
+
     $info = curl_getinfo($ch);
     $url = mc::clean($info['url']);
     $filename = mc::$var_path.'curl/'.$url.'.curl';
-    
+
     if(mc::string_has($filename, 'localhost')){
       $response = go_curl($ch);
     }elseif(!file_exists($filename) || CURL_FORCE ){
-      
+
       $file = fopen($filename, 'w+');
       $response = go_curl($ch);
       if($response){
         // CASE GOT RESPONSE
-        fputs($file, $response, strlen($response));        
+        fputs($file, $response, strlen($response));
       }else{
         // CASE NO RESPONSE
-        
+
       }
-      
+
     }else{
-      
+
       $response = file_get_contents($filename);
-      
+
     }
-    
+
     return $response;
  }
- 
+
  function initConfig(){
    $file = fopen(mc::$config_path.'config.cnf','a+');
    while(1){
@@ -396,12 +396,12 @@ function handle_curl($ch){
      if(!isset($array[1])){
        break;
      }
-     
+
      runkit_constant_add(strtoupper($array[0]),$array[1]);
    }
-   
+
  }
- 
+
  function initNetwork(){
   // If Internet Not Wo
 //   if(!INTERNET_WORKING){
@@ -410,6 +410,7 @@ function handle_curl($ch){
 //       runkit_constant_add('INTERNET_WORKING',1);
 //       fopen(mc::$config_path.'force.curl', 'w+');
 //     }
-//   }   
+//   }
  }
  initConfig();
+ */
