@@ -17,10 +17,10 @@ PHPDoc is provided with the function.
 example:
 <br>
 <code>
-  $var1 = array('MY'=>'Control',21034);
-  $var2 = "This is string";
-  $class = new \stdClass();
-  \mc::pre($var1,$var2,$class,'One more string',['array']);
+    $var1 = array('MY'=>'Control',21034);
+    $var2 = "This is string";
+    $class = new \stdClass();
+    \mc::pre($var1,$var2,$class,'One more string',['array']);
 </code>
 
 <br/>
