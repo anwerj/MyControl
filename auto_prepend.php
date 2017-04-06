@@ -112,6 +112,18 @@ class mc {
         die();
     }
 
+    public static function dd(){
+        $calling = self::calling_line(self::$trace_back);
+        $todd = [
+            'line' =>  $calling['file'].':'.$calling['line_number']
+        ];
+        foreach (func_get_args() as $key => $value) {
+            $todd["arg_$key"] = $value;
+        }
+
+        return dd($todd);
+    }
+
     public static function cache($var,$data){
 
     }
@@ -128,7 +140,7 @@ class mc {
         return $return;
     }
     public static function write($var,$data,$mode='w+'){
-        $filename = self::$var_path.$var.".json";
+        $filename = self::$var_path.self::clean(json_encode($var)).".json";
         $f = fopen($filename, $mode);
         if(!is_string($data)){
             $data = json_encode($data);
@@ -348,6 +360,12 @@ function mcalert($text = 'OK'){
 
 }
 
+function mcinit($options = []){
+    mc::$log_path = dirname(__FILE__).'/log/';
+    mc::$var_path = dirname(__FILE__).'/var/';
+    mc::$config_path = dirname(__FILE__).'/config/';
+}
+
 /*
  *  Override PHP functions
  *  Comment these lines if you dont have runkit install
@@ -414,3 +432,5 @@ function handle_curl($ch){
  }
  initConfig();
  */
+
+ mcinit();
