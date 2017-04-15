@@ -1,5 +1,9 @@
 <?php
 
+class MCException extends \Exception{
+    public $disableReporting = true;
+}
+
 class mc {
 
     public static $log_path = '/var/www/html/core/log/';
@@ -31,7 +35,8 @@ class mc {
 
         //header('Content-Type: text/htnl');
 
-        echo self::first_byte();
+        echo "<h4 style='background-color:#333;color:#ddd;padding:10px'>"
+                    . $calling['file']." : ".$calling['line_number'] . "</h4>";
 
         if(self::$trace_back==1){
             $variables = func_get_args();
@@ -59,12 +64,15 @@ class mc {
                 else
                     print_r($variables);
         }
+
         if ($np)
             echo "</pre>";
-        echo "<h4 style='background-color:#ccc;padding: 5px;'>"
-                    . $calling['file']." : ".$calling['line_number'] . "</h4>";
+        echo self::first_byte();
+
         if (!self::string_has($calling_line, '#ND')) {
             die();
+            //throw new \MCException();
+
         }
     }
 
@@ -124,12 +132,13 @@ class mc {
         return dd($todd);
     }
 
+
     public static function cache($var,$data){
 
     }
 
     public static function read($var,$toArray = 0){
-        $filename = self::$var_path.$var.".json";
+        $filename = self::$var_path.self::clean($var).".json";
         $return = '{}';
         if(file_exists($filename)){
             $return =  file_get_contents($filename);
@@ -143,7 +152,7 @@ class mc {
         $filename = self::$var_path.self::clean(json_encode($var)).".json";
         $f = fopen($filename, $mode);
         if(!is_string($data)){
-            $data = json_encode($data);
+            $data = json_encode($data , JSON_PRETTY_PRINT);
         }
         if(!empty($data) && strlen($data)>10)
             return fputs($f, $data, strlen($data));
@@ -357,20 +366,16 @@ function mcjswv(){
 function mcalert($text = 'OK'){
     mc::$trace_back = 2;
     mc::alert($text);#WV
-
 }
 
 function mcinit($options = []){
     mc::$log_path = dirname(__FILE__).'/log/';
     mc::$var_path = dirname(__FILE__).'/var/';
     mc::$config_path = dirname(__FILE__).'/config/';
+
 }
 
 /*
- *  Override PHP functions
- *  Comment these lines if you dont have runkit install
- *  These will save all outgoing curl requests.
-
 
  @runkit_function_remove('go_curl');
  runkit_function_rename('curl_exec','go_curl');
@@ -434,3 +439,4 @@ function handle_curl($ch){
  */
 
  mcinit();
+
