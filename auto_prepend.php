@@ -138,7 +138,7 @@ class mc {
     }
 
     public static function read($var,$toArray = 0){
-        $filename = self::$var_path.self::clean($var).".json";
+        $filename = self::$var_path.self::clean(json_encode($var)).".json";
         $return = '{}';
         if(file_exists($filename)){
             $return =  file_get_contents($filename);
